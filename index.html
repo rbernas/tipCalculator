@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="WaitStaff">
+<head>
+	<meta charset="UTF-8">
+	<script src="angular.js"></script> 
+	<script src="angular-route.js"></script>
+	<style type-"text/css">
+		h1, h2, p, nav { text-align: center;}
+		
+		.general { 
+			position: relative; 
+			margin: auto;
+			margin-top: 50px;
+			width: 750px;
+			height: 650px;
+			border: solid 1px red;
+		}
+	
+		.mainPage {
+			width: 750px;
+			margin: auto;
+		}
+		.meal {
+			position: absolute;
+			width: 100%;
+			height: 325px;
+			border: 1px solid black;
+		}
+
+		.submit {
+			position: absolute;
+			left: 330px;
+		}
+
+		.cancel {
+			position: absolute;
+			left: 400px;
+		}
+
+		.customer {
+			position: absolute;
+			bottom: 0;
+			right: 0;
+			width: 100%;
+			height: 300px;
+			border: 1px solid black;
+		}
+
+		.earnings {
+			margin: auto;
+			margin-top: 50px;
+			width: 650px;
+			height: 300px;
+			border: solid 1px black;
+		}
+	</style>
+	<script type="text/javascript">
+		var demo = angular.module('WaitStaff', ['ngRoute']);
+
+		demo.config(['$routeProvider', function($routeProvider) {
+			$routeProvider
+			.when('/', {templateUrl: 'home.html',controller: 'HomeCtrl'}).
+			when('/new-meal', {templateUrl: 'newMeal.html', controller: 'newMealCtrl'}).
+			when('/my-earnings', {templateUrl: 'earnings.html', controller: 'earningsCtrl'}).
+			when('/error', {template: '<p>Error - Page Not Found</p>'}).
+			otherwise('/error');
+		}]);
+
+		demo.factory('info', function() {
+			return {
+					data: {
+						tipTotal: 0,
+						tip: 0,
+						subtotal: 0,
+						price: 0,
+						tax: 0,
+						displayTip: 0,
+						tipTotalhtml: 0,
+
+						subtotalArray: [],
+						tipArray: []
+					}
+			}
+		});
+
+		demo.controller('HomeCtrl', function($scope) {
+			$scope.test = 'rick';
+		});
+
+		demo.controller('newMealCtrl', function($scope, $routeParams, info) {
+					$scope.tipTotal = info.data.tipTotal;
+					$scope.subTotal = info.data.subTotal;
+					$scope.price = info.data.price;
+					$scope.tax = info.data.tax;
+					$scope.displayTip = info.data.displayTip;
+					$scope.subtotalArray = info.data.subtotalArray;
+					$scope.tipArray = info.data.tipArray;
+			
+				$scope.calculate = function ($event) {
+					$event.preventDefault();
+
+					info.data.tipTotal = 0;
+					info.data.subTotal = $scope.price + (($scope.tax/100.0) * $scope.price);
+					// console.log(info.data.subTotal);
+					info.data.displayTip = (info.data.subTotal * ($scope.tip/100));
+					// console.log(info.data.displayTip);
+					info.data.tipArray.push(info.data.displayTip);
+					// console.log(info.data.tipArray);
+					for (var i = 0; i < info.data.tipArray.length; i++) {
+						info.data.tipTotal += info.data.tipArray[i]
+						};
+
+					// console.log(info.data.tipTotal);
+					$scope.subTotalhtml = info.data.subTotal;
+					$scope.displayTiphtml = info.data.displayTip;
+					$scope.tipTotalhtml = info.data.tipTotal;
+					console.log('inside earnings newmealCtrl, factory =  ' + info.data.tipTotal);
+					console.log('inside earnings newmealCtrl, scope variable is =  ' + info.data.tipTotal);
+					// console.log('inside calc function, $scope variable = ' + $scope.tipTotalhtml);
+					};
+
+					// console.log('outside calc function, $scope variable = ' + $scope.tipTotalhtml);
+					
+			$scope.remove = function () { $scope.price = null; 
+																	  $scope.tax = null;
+																	  $scope.tip = null;};
+
+			$scope.reload = function () { location.reload();};
+
+		});
+
+	demo.controller('earningsCtrl', function($scope, $routeParams, info) {
+		$scope.tipTotalearnings = info.data.tipTotal;
+		$scope.tipArray = info.data.tipArray;
+		console.log('inside earnings earningsCtrl ' + info.data.tipTotal);
+		$scope.reload = function () { location.reload();};
+	});
+</script>
+<title>WaitStaff</title>
+</head>
+<body>
+	<nav>	
+		<a href="#/">Home</a>|
+		<a href="#/new-meal">New Meal</a>|
+		<a href="#/my-earnings">My Earnings</a>
+	</nav>
+	<div ng-view></div>	
+	
+	<script type="text/ng-template" id="home.html">
+		<h1>Waitstaff Calculator</h1>
+		<p class="mainPage">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
+	</script>
+	<script type="text/ng-template" id="newMeal.html">
+		<div class="general">
+					<div class="meal">
+						<h2>Enter the Meal Details</h2>
+						<form name="myForm">
+							<p>Base Meal Price: $ <input type="number" ng-keyup="test($event)" step="0.01" name="price" ng-model="price" required min="0"/><br><br>
+							Tax Rate: % <input type="number" step="0.01" name="tax" ng-model="tax" required min="0"/><br><br>
+							Tip Percentage: % <input type="number" step="0.01" name="tip" ng-model="tip" required min="0"/></p>
+						</form>
+						<br><br>
+						<button class="submit" type="text" ng-click="calculate($event)">Submit</button>
+						<button class="cancel" type="text" ng-click="remove()">Cancel</button>
+		</div>
+
+		<div class="customer">
+			<h2>Customer Charges</h2>
+			<p>	Subtotal: ${{ subTotalhtml | number: 2 }}<br><br>
+				Tip: ${{ displayTiphtml | number: 2 }}<br><br>
+				Total: ${{ subTotalhtml + displayTiphtml | number: 2 }}<br><br>
+				Tip Total: ${{ tipTotalhtml  | number: 2 }}
+			</p>
+		</div>
+	</script>
+
+	<script type="text/ng-template" id="earnings.html">
+		<div class="earnings">
+		<h2>My Earnings Info</h2>
+
+				<p>Tip Total: ${{ tipTotalearnings  | number: 2 }}<br><br>
+					Meal Count: {{ tipArray.length }}<br><br>
+					Average Tip Per Meal: {{ tipTotalearnings / tipArray.length | number: 2  }}
+					<button class="reset" type="text" ng-click="reload()">Reset</button>
+				</p>
+		</div>
+	</script>
+
+</body>
+</html>
